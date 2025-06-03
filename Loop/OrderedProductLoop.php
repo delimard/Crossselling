@@ -13,15 +13,20 @@ use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 
 class OrderedProductLoop extends BaseLoop implements ArraySearchLoopInterface
 {
-    protected function getArgDefinitions()
+    /**
+     * @return ArgumentCollection
+     */
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
-            //Argument::createIntListTypeArgument('product_id')
             Argument::createIntTypeArgument('product_id')
         );
     }
 
-    public function buildArray()
+    /**
+     * @return array
+     */
+    public function buildArray(): array
     {
         $productId = $this->getProductId();
      
@@ -40,12 +45,7 @@ class OrderedProductLoop extends BaseLoop implements ArraySearchLoopInterface
                              WHERE order_product.product_ref IN (SELECT product.ref from product where product.id='$productId')
                         )
                     )
-                 ) AND NOT product.id='$productId'
-
-ORDER BY RAND()";
-
-        
-
+                 ) AND NOT product.id='$productId' ORDER BY RAND()";
 
         $stmt = $con->prepare($query);
         $stmt->execute();
@@ -59,13 +59,15 @@ ORDER BY RAND()";
         return $results;
     }
 
-    public function parseResults(LoopResult $loopResult)
+    /**
+     * @param LoopResult $loopResult
+     * @return LoopResult
+     */
+    public function parseResults(LoopResult $loopResult): LoopResult
     {
-        foreach ($loopResult->getResultDataCollection() as $resultat) {
+        foreach ($loopResult->getResultDataCollection() as $result) {
             $loopResultRow = new LoopResultRow();
-
-            $loopResultRow->set("ID", $resultat);
-
+            $loopResultRow->set("ID", $result);
             $loopResult->addRow($loopResultRow);
         }
 

@@ -13,16 +13,24 @@
 namespace CrossSelling;
 
 use Thelia\Module\BaseModule;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 
 class CrossSelling extends BaseModule
 {
     /** @var string */
     const DOMAIN_NAME = 'crossselling';
 
-    /*
-     * You may now override BaseModuleInterface methods, such as:
-     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
-     *
-     * Have fun !
+    /**
+     * @param ServicesConfigurator $servicesConfigurator
+     * @return void
      */
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
+    }
+
+  
 }

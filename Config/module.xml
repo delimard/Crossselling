@@ -11,7 +11,7 @@
     <languages>
         <language>fr_FR</language>
     </languages>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <authors>
         <author>
             <name>Delimard Thibault</name>
@@ -27,7 +27,7 @@
         <module version="&gt;0.2">HookSearch</module>
     </required>
     -->
-    <thelia>2.3.4</thelia>
+    <thelia>2.5.0</thelia>
     <stability>other</stability>
     <mandatory>0</mandatory>
     <hidden>0</hidden>
