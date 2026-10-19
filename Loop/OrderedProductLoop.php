@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CrossSelling\Loop;
 
-use Propel\Runtime\Connection\SqlConnectionInterface;
 use Propel\Runtime\Propel;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -11,11 +12,13 @@ use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 
+/**
+ * Visible products bought in the same orders as the given product.
+ *
+ * @method int|null getProductId()
+ */
 class OrderedProductLoop extends BaseLoop implements ArraySearchLoopInterface
 {
-    /**
-     * @return ArgumentCollection
-     */
     protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
@@ -23,51 +26,31 @@ class OrderedProductLoop extends BaseLoop implements ArraySearchLoopInterface
         );
     }
 
-    /**
-     * @return array
-     */
     public function buildArray(): array
     {
-        $productId = $this->getProductId();
-     
-        /** @var SqlConnectionInterface $con */
-        $con = Propel::getConnection();
+        $productId = (int) $this->getProductId();
 
-        $query = "SELECT product.id as product_id FROM product
-                 WHERE product.ref IN(
-                     SELECT DISTINCT order_product.product_ref FROM order_product
-                    RIGHT JOIN product_sale_elements ON order_product.product_ref = product_sale_elements.ref
-                    JOIN product ON product_sale_elements.id = product.id
-                    WHERE  product.visible = 1 AND order_product.order_id IN(
-                        SELECT `order`.id FROM `order`
-                        WHERE `order`.id IN(
-                             SELECT order_product.order_id FROM order_product 
-                             WHERE order_product.product_ref IN (SELECT product.ref from product where product.id='$productId')
-                        )
-                    )
-                 ) AND NOT product.id='$productId' ORDER BY RAND()";
+        $query = 'SELECT p.id AS product_id FROM product p
+            INNER JOIN order_product op ON op.product_ref = p.ref
+            WHERE p.visible = 1 AND p.id <> :product_id
+            AND op.order_id IN (
+                SELECT op2.order_id FROM order_product op2
+                INNER JOIN product p2 ON p2.ref = op2.product_ref
+                WHERE p2.id = :product_id
+            )
+            GROUP BY p.id ORDER BY RAND()';
 
-        $stmt = $con->prepare($query);
-        $stmt->execute();
+        $stmt = Propel::getConnection()->prepare($query);
+        $stmt->execute([':product_id' => $productId]);
 
-        $results = [];
-
-        while ($result = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $results[] = $result['product_id'];
-        }
-
-        return $results;
+        return array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
     }
 
-    /**
-     * @param LoopResult $loopResult
-     * @return LoopResult
-     */
     public function parseResults(LoopResult $loopResult): LoopResult
     {
-        foreach ($loopResult->getResultDataCollection() as $result) {
+        foreach ($loopResult->getResultDataCollection() as $productId) {
             $loopResultRow = new LoopResultRow();
-            $loopResultRow->set("ID", $result);
+            $loopResultRow->set('ID', $productId);
             $loopResult->addRow($loopResultRow);
         }
 

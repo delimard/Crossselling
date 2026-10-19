@@ -1,9 +1,9 @@
 {
-  "name": "your-vendor/cross-selling-module",
+  "name": "thelia/cross-selling-module",
   "license": "LGPL-3.0+",
   "type": "thelia-module",
   "require": {
-    "thelia/installer": "~1.1"
+    "thelia/installer": "^1.6"
   },
   "extra": {
     "installer-name": "CrossSelling"

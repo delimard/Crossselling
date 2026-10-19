@@ -10,6 +10,8 @@
 /*      file that was distributed with this source code.                             */
 /*************************************************************************************/
 
+declare(strict_types=1);
+
 namespace CrossSelling;
 
 use Thelia\Module\BaseModule;
@@ -27,10 +29,15 @@ class CrossSelling extends BaseModule
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->exclude([__DIR__.'/I18n/*'])
             ->autowire(true)
             ->autoconfigure(true);
     }
 
-  
+    /*
+     * You may now override BaseModuleInterface methods, such as:
+     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
+     *
+     * Have fun !
+     */
 }
